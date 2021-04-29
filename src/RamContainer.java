@@ -1,9 +1,10 @@
+import java.io.IOException;
 import java.util.Hashtable;
 
 public class RamContainer<KeyType, ValueType> implements Container<KeyType, ValueType>{
-    Hashtable<KeyType, ValueType> table;
+    private Hashtable<KeyType, ValueType> table;
     int size;
-    RomContainer<KeyType, String> romContainer;
+    private RomContainer<KeyType, ValueType> romContainer;
 
     RamContainer(int size){
         table = new Hashtable<>();
@@ -17,19 +18,19 @@ public class RamContainer<KeyType, ValueType> implements Container<KeyType, Valu
         if(table.size() < size)
             table.put(key, value);
         else{
-            romContainer.put();
+            putToRom();
+            table.put(key, value);
         }
     }
 
     @Override
     public ValueType get(KeyType key) {
-        try{
+        if(table.containsKey(key))
             return table.get(key);
-        }catch (Exception e){
-            //TODO put here method from ROMContainer
-            return null;
-        }catch (Exception e){
-            return null;
+        else {
+            putToRom();
+            table.put(key, romContainer.get(key));
+            return romContainer.get(key);
         }
     }
 
@@ -37,8 +38,8 @@ public class RamContainer<KeyType, ValueType> implements Container<KeyType, Valu
     public void remove(KeyType key) {
         try{
             table.remove(key);
-        }catch (ClassNotFoundException e){
-            //TODO put here method from ROMContainer
+        }catch (IndexOutOfBoundsException e){
+            romContainer.remove(key);
 
         }catch (Exception e){
 
@@ -47,7 +48,18 @@ public class RamContainer<KeyType, ValueType> implements Container<KeyType, Valu
 
     @Override
     public int size() {
-        //TODO return size from ROM table;
-        return table.size();
+        return table.size() + romContainer.size();
+    }
+
+    //Функцмя, которая переносит крайний по очерёдности добавленный объект на диск и удаляет этот объект из оперативной памяти
+    private void putToRom(){
+        try {
+            romContainer.put((KeyType) table.entrySet().toArray()[table.entrySet().toArray().length-1], (ValueType) table.values().toArray()[table.size()-1]);
+            String q = table.entrySet().toArray()[table.size()-1].toString().split("=")[0];
+            System.out.println(q);
+            table.remove(Integer.parseInt(q));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

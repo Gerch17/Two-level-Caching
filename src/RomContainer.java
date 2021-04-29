@@ -1,17 +1,15 @@
-import com.sun.security.auth.UnixNumericUserPrincipal;
-
 import java.io.*;
 import java.util.Hashtable;
 import java.util.UUID;
 
 public class RomContainer<KeyType, ValueType> implements Container<KeyType, ValueType>{
-    Hashtable<KeyType, String> table;
+    private Hashtable<KeyType, String> romTable;
 
     RomContainer(){
-        table = new Hashtable<>();
+        romTable = new Hashtable<>();
 
         File tempFile = new File("temp\\");
-        if(tempFile.exists()){
+        if(!tempFile.exists()){
             tempFile.mkdirs();
         }
     }
@@ -19,9 +17,8 @@ public class RomContainer<KeyType, ValueType> implements Container<KeyType, Valu
 
     @Override
     public void put(KeyType key, ValueType value) throws IOException {
-        String path;
-        path = "temp\\" + UUID.randomUUID().toString() + ".temp";
-        table.put(key, path);
+        String path = "temp\\" + UUID.randomUUID().toString() + ".temp";
+        romTable.put(key, path);
 
         FileOutputStream fout = new FileOutputStream(path);
         ObjectOutputStream objStream = new ObjectOutputStream(fout);
@@ -34,7 +31,7 @@ public class RomContainer<KeyType, ValueType> implements Container<KeyType, Valu
 
     @Override
     public ValueType get(KeyType key) {
-        String path = table.get(key);
+        String path = romTable.get(key);
 
         try {
             FileInputStream fin = new FileInputStream(path);
@@ -52,14 +49,14 @@ public class RomContainer<KeyType, ValueType> implements Container<KeyType, Valu
 
     @Override
     public void remove(KeyType key) {
-        if(table.containsKey(key)){
-            File file = new File(table.remove(key));
+        if(romTable.containsKey(key)){
+            File file = new File(romTable.remove(key));
             file.delete();
         }
     }
 
     @Override
     public int size() {
-        return table.size();
+        return romTable.size();
     }
 }
