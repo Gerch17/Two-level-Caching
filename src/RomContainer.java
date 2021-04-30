@@ -8,7 +8,7 @@ public class RomContainer implements Container{
     RomContainer(){
         romTable = new Hashtable<>();
 
-        File tempFile = new File("temp");
+        File tempFile = new File("romStorage\\");
         if(!tempFile.exists()){
             tempFile.mkdirs();
         }
@@ -17,7 +17,7 @@ public class RomContainer implements Container{
 
     @Override
     public synchronized void put(int key, Employee value) throws IOException {
-        String path = "temp/" + UUID.randomUUID().toString() + ".temp";
+        String path = "romStorage\\" + UUID.randomUUID().toString() + ".temp";
         romTable.put(key, path);
 
         FileOutputStream fout = new FileOutputStream(path);

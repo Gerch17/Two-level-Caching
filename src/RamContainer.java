@@ -28,8 +28,10 @@ public class RamContainer implements Container{
 
     @Override
     public synchronized Employee get(int key) {
-        if(table.containsKey(key))
+        if(table.containsKey(key)){
+            System.out.println("элемент получен из контейнера в оперативной памяти");
             return table.get(key);
+        }
         else if (romContainer.containsKey(key)){
             putToRom();
             table.put(key, romContainer.get(key));
