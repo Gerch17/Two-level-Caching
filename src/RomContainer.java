@@ -2,13 +2,13 @@ import java.io.*;
 import java.util.Hashtable;
 import java.util.UUID;
 
-public class RomContainer<KeyType, ValueType> implements Container<KeyType, ValueType>{
-    private Hashtable<KeyType, String> romTable;
+public class RomContainer implements Container{
+    private Hashtable<Integer, String> romTable;
 
     RomContainer(){
         romTable = new Hashtable<>();
 
-        File tempFile = new File("temp\\");
+        File tempFile = new File("temp");
         if(!tempFile.exists()){
             tempFile.mkdirs();
         }
@@ -16,8 +16,8 @@ public class RomContainer<KeyType, ValueType> implements Container<KeyType, Valu
 
 
     @Override
-    public void put(KeyType key, ValueType value) throws IOException {
-        String path = "temp\\" + UUID.randomUUID().toString() + ".temp";
+    public synchronized void put(int key, Employee value) throws IOException {
+        String path = "temp/" + UUID.randomUUID().toString() + ".temp";
         romTable.put(key, path);
 
         FileOutputStream fout = new FileOutputStream(path);
@@ -30,14 +30,14 @@ public class RomContainer<KeyType, ValueType> implements Container<KeyType, Valu
     }
 
     @Override
-    public ValueType get(KeyType key) {
+    public synchronized Employee get(int key) {
         String path = romTable.get(key);
 
         try {
             FileInputStream fin = new FileInputStream(path);
             ObjectInputStream objInputStream = new ObjectInputStream(fin);
 
-            ValueType object = (ValueType) objInputStream.readObject();
+            Employee object = (Employee) objInputStream.readObject();
             fin.close();
             objInputStream.close();
             remove(key);
@@ -48,15 +48,21 @@ public class RomContainer<KeyType, ValueType> implements Container<KeyType, Valu
     }
 
     @Override
-    public void remove(KeyType key) {
+    public synchronized Boolean remove(int key) {
         if(romTable.containsKey(key)){
             File file = new File(romTable.remove(key));
             file.delete();
+            return true;
         }
+        return false;
+    }
+
+    public synchronized Boolean containsKey(int key){
+        return romTable.containsKey(key);
     }
 
     @Override
-    public int size() {
+    public synchronized int size() {
         return romTable.size();
     }
 }

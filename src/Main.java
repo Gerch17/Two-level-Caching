@@ -1,24 +1,46 @@
-import java.util.ArrayList;
-import java.util.Hashtable;
-import java.util.List;
-import java.util.Map;
-
 public class Main {
+    public static class ContainerThread extends Thread{
+        private RamContainer ramContainerSecond;
+
+        ContainerThread(RamContainer ramContainer){
+            this.ramContainerSecond = ramContainer;
+        }
+
+        @Override
+        public void run(){
+            tPrint("Второй");
+            ramContainerSecond.put(11, new Employee("Dev", 32));
+            tPrint("Второй");
+            ramContainerSecond.put(12, new Employee("Manager", 33));
+            tPrint("Второй");
+            ramContainerSecond.get(1);
+            tPrint("Второй");
+            ramContainerSecond.remove(2);
+        }
+    }
+
+
     public static void main(String[] args) {
-        RamContainer<Integer, String> ram = new RamContainer<>(3);
-        ram.put(1, "qwe");
-        ram.put(2, "asd");
-        ram.put(3, "zxc");
-        ram.put(4, "rty");
-        ram.get(1);
+        RamContainer ram = new RamContainer(3);
+        ContainerThread containerThread = new ContainerThread(ram);
+        containerThread.start();
+        tPrint("Первый");
+        ram.put(1, new Employee("Manager", 25));
+        tPrint("Первый");
+        ram.put(2, new Employee("Dev", 44));
+        tPrint("Первый");
+        ram.put(3, new Employee("HR", 35));
+        tPrint("Первый");
+        ram.put(4, new Employee("Manager", 29));
+        tPrint("Первый");
+        ram.get(11);
+        tPrint("Первый");
+        ram.get(2);
         System.out.println(ram.size());
-        /*Hashtable<Integer, Integer> h = new Hashtable<>();
-        h.put(1, 10);
-        h.put(2, 20);
-        h.put(3, 30);
-        h.remove(3);
-        h.put(4, 40);
-        h.get(3);
-        System.out.println(h.entrySet().toArray()[3]);*/
+
+    }
+
+    public synchronized static void tPrint(String str){
+        System.out.print(str + " поток: ");
     }
 }

@@ -1,65 +1,75 @@
 import java.io.IOException;
 import java.util.Hashtable;
 
-public class RamContainer<KeyType, ValueType> implements Container<KeyType, ValueType>{
-    private Hashtable<KeyType, ValueType> table;
+public class RamContainer implements Container{
+    private Hashtable<Integer, Employee> table;
     int size;
-    private RomContainer<KeyType, ValueType> romContainer;
+    private RomContainer romContainer;
 
     RamContainer(int size){
         table = new Hashtable<>();
         this.size = size;
-        romContainer = new RomContainer<>();
+        romContainer = new RomContainer();
     }
 
 
     @Override
-    public void put(KeyType key, ValueType value) {
-        if(table.size() < size)
-            table.put(key, value);
+    public synchronized void put(int id, Employee value) {
+        if(table.size() < size) {
+            table.put(id, value);
+            System.out.println("элемент добавлен в контейнер");
+        }
         else{
             putToRom();
-            table.put(key, value);
+            table.put(id, value);
+            System.out.println("элемент добавлен в контейнер, с переносом старого на диск");
         }
     }
 
     @Override
-    public ValueType get(KeyType key) {
+    public synchronized Employee get(int key) {
         if(table.containsKey(key))
             return table.get(key);
-        else {
+        else if (romContainer.containsKey(key)){
             putToRom();
             table.put(key, romContainer.get(key));
-            return romContainer.get(key);
+            System.out.println("старый элемент был перенесён на диск, вызванный элемент перенесён в контейнер оперативной памяти");
+            return table.get(key);
         }
+        System.out.println("элемент не найден");
+        return null;
     }
 
     @Override
-    public void remove(KeyType key) {
-        try{
+    public synchronized Boolean remove(int key) {
+        if(table.containsKey(key)) {
             table.remove(key);
-        }catch (IndexOutOfBoundsException e){
-            romContainer.remove(key);
-
-        }catch (Exception e){
-
+            System.out.println("элемент удалён из контейнера в оперативной памяти");
+            return true;
+        } else if(romContainer.remove(key)) {
+            System.out.println("элемент удалён из контейнера на диске");
+            return true;
         }
+        System.out.println("элемент не найден");
+        return false;
     }
 
     @Override
-    public int size() {
+    public synchronized int size() {
         return table.size() + romContainer.size();
     }
 
     //Функцмя, которая переносит крайний по очерёдности добавленный объект на диск и удаляет этот объект из оперативной памяти
-    private void putToRom(){
+    private synchronized Boolean putToRom(){
         try {
-            romContainer.put((KeyType) table.entrySet().toArray()[table.entrySet().toArray().length-1], (ValueType) table.values().toArray()[table.size()-1]);
-            String q = table.entrySet().toArray()[table.size()-1].toString().split("=")[0];
-            System.out.println(q);
-            table.remove(Integer.parseInt(q));
+            int id = Integer.parseInt(table.entrySet().toArray()[table.entrySet().toArray().length-1].toString().split("=")[0]);
+            Employee employee = table.get(id);
+            romContainer.put(id, employee);
+            table.remove(id);
+            return true;
         } catch (IOException e) {
             e.printStackTrace();
         }
+        return false;
     }
 }
